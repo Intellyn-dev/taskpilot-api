@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import Project, Task, ProjectMember, User
-from taskpilot_shared.analytics import summarize_project, get_member_workload
+from taskpilot_shared.analytics import summarize_project, get_member_workload, find_overdue_chain
 from taskpilot_shared.formatters import format_priority
 
 router = APIRouter()
@@ -55,6 +55,9 @@ def get_project_stats(project_id: int, db: Session = Depends(get_db)):
     stats = summarize_project(task_dicts)
     workload = get_member_workload(task_dicts)
     stats["workload"] = workload
+    blocked_tasks = [t for t in task_dicts if t.get("blocked_by")]
+    if blocked_tasks:
+        stats["blocked_chains"] = [find_overdue_chain(task_dicts, t["id"]) for t in blocked_tasks]
     assignee_emails = [t.assignee.email for t in tasks]
     stats["assignees"] = list(set(assignee_emails))
     return stats
