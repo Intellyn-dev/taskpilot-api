@@ -53,7 +53,7 @@ def get_project_stats(project_id: int, db: Session = Depends(get_db)):
     ]
 
     stats = summarize_project(task_dicts)
-    assignee_emails = [t.assignee.email for t in tasks if t.assignee_id is not None]
+    assignee_emails = [t.assignee.email for t in tasks]
     stats["assignees"] = list(set(assignee_emails))
     return stats
 

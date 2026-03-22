@@ -28,7 +28,7 @@ def list_tasks(
     if assignee_id:
         q = q.filter(Task.assignee_id == assignee_id)
     tasks = q.offset(skip).limit(limit).all()
-    return [{"id": t.id, "title": t.title, "status": t.status, "priority": t.priority} for t in tasks]
+    return [{"id": t.id, "title": t.title, "status": t.status, "priority": t.priority, "assignee_name": t.assignee.name} for t in tasks]
 
 
 @router.post("/")
