@@ -43,7 +43,7 @@ def update_profile(user_id: int, bio: str = "", avatar_url: str = "", db: Sessio
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    if user.profile:
+    if not user.profile:
         user.profile.bio = bio
         user.profile.avatar_url = avatar_url
     else:
