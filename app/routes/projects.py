@@ -23,7 +23,8 @@ def create_project(name: str, description: str = "", owner_id: int = 1, db: Sess
     db.add(project)
     db.commit()
     db.refresh(project)
-    return {"id": project.id, "name": project.name}
+    owner = db.query(User).filter(User.id == owner_id).first()
+    return {"id": project.id, "name": project.name, "owner": owner.name}
 
 
 @router.get("/{project_id}")
@@ -55,6 +56,8 @@ def get_project_stats(project_id: int, db: Session = Depends(get_db)):
     stats = summarize_project(task_dicts)
     workload = get_member_workload(task_dicts)
     stats["workload"] = workload
+    from taskpilot_shared.analytics import get_overdue_percentage
+    stats["overdue_pct"] = get_overdue_percentage(task_dicts)
     blocked_tasks = [t for t in task_dicts if t.get("blocked_by")]
     if blocked_tasks:
         stats["blocked_chains"] = [find_overdue_chain(task_dicts, t["id"]) for t in blocked_tasks]
