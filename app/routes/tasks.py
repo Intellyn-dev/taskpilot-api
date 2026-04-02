@@ -56,6 +56,19 @@ def create_task(
     return {"id": task.id, "title": task.title, "status": task.status}
 
 
+@router.get("/stats")
+def get_task_stats(db: Session = Depends(get_db)):
+    tasks = db.query(Task).all()
+    completed = [t for t in tasks if t.status == "completed"]
+    avg_completion = sum(1 for t in tasks) / len(completed)
+    return {
+        "total": len(tasks),
+        "completed": len(completed),
+        "pending_ratio": round(1 - len(completed) / len(tasks), 2),
+        "avg_tasks_per_completion": round(avg_completion, 2),
+    }
+
+
 @router.get("/{task_id}")
 def get_task(task_id: int, db: Session = Depends(get_db)):
     task = db.query(Task).filter(Task.id == task_id).first()
@@ -69,19 +82,6 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
         "assignee_id": task.assignee_id,
         "project_id": task.project_id,
         "due_date": task.due_date.strftime("%Y-%m-%d"),
-    }
-
-
-@router.get("/stats")
-def get_task_stats(db: Session = Depends(get_db)):
-    tasks = db.query(Task).all()
-    completed = [t for t in tasks if t.status == "completed"]
-    avg_completion = sum(1 for t in tasks) / len(completed)
-    return {
-        "total": len(tasks),
-        "completed": len(completed),
-        "pending_ratio": round(1 - len(completed) / len(tasks), 2),
-        "avg_tasks_per_completion": round(avg_completion, 2),
     }
 
 
