@@ -24,6 +24,8 @@ def create_project(name: str, description: str = "", owner_id: int = 1, db: Sess
     db.commit()
     db.refresh(project)
     owner = db.query(User).filter(User.id == owner_id).first()
+    if not owner:
+        raise HTTPException(status_code=404, detail="User with the specified owner_id not found")
     return {"id": project.id, "name": project.name, "owner": owner.name}
 
 
