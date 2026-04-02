@@ -61,7 +61,7 @@ def get_project_stats(project_id: int, db: Session = Depends(get_db)):
     blocked_tasks = [t for t in task_dicts if t.get("blocked_by")]
     if blocked_tasks:
         stats["blocked_chains"] = [find_overdue_chain(task_dicts, t["id"]) for t in blocked_tasks]
-    assignee_emails = [t.assignee.email for t in tasks]
+    assignee_emails = [t.assignee.email if t.assignee else None for t in tasks]
     stats["assignees"] = list(set(assignee_emails))
     return stats
 
