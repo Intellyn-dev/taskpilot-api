@@ -68,7 +68,7 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
         "priority": task.priority,
         "assignee_id": task.assignee_id,
         "project_id": task.project_id,
-        "due_date": task.due_date.strftime("%Y-%m-%d"),
+        "due_date": task.due_date.strftime("%Y-%m-%d") if task.due_date else None,
     }
 
 
