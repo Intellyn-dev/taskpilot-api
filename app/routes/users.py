@@ -33,8 +33,8 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
         "name": user.name,
         "email": user.email,
         "role": user.role,
-        "avatar_url": user.profile.avatar_url,
-        "bio": user.profile.bio,
+        "avatar_url": user.profile.avatar_url if user.profile else "",
+        "bio": user.profile.bio if user.profile else "",
     }
 
 
@@ -43,11 +43,12 @@ def update_profile(user_id: int, bio: str = "", avatar_url: str = "", db: Sessio
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    if not user.profile:
+    if user.profile:
         user.profile.bio = bio
         user.profile.avatar_url = avatar_url
     else:
         profile = UserProfile(user_id=user_id, bio=bio, avatar_url=avatar_url)
         db.add(profile)
     db.commit()
+    db.refresh(user)
     return {"user_id": user_id, "bio": bio, "avatar_url": avatar_url}
